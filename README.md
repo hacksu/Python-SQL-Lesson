@@ -1,2 +1,7 @@
-# Python-SQL-Lesson
-A Hacksu lesson that uses Python alongside SQL databases to store Reddit information
+# SQLite via Python
+
+SQL ("Structured Query Language") is a language for constructing and using databases that has been very popular for a long time. It was the third most-used programming language for all professional developers who responded to the Stack Overflow Developer Survey in 2022. The databases that you construct and use by writing SQL consists of tables with rows and columns in which you can store data persistently and retrieve later; the idea of a database is that it will store data behind the scenes that persists even if the program that uses data is closed and the computer its running on is turned on and off again; a database is usually basically a sophisticated way to save data to files.
+
+A lot of SQL databases are maintained by database servers. These are applications, like MySQL and PostgreSQL, who store data as needed on behalf of a program or programs that someone like you has written. These are large, powerful programs that are built to process huge amounts of data very quickly, and often run on networked devices so that they can be used by user-facing programs on other computers or devices entirely.
+
+When you just need a way to save a normal amount of data in a normal file, though, the easiest SQL database solution is called SQLite. SQLite is the most widely-deployed database in the world; it is installed on every Android and Apple phone so that apps can use it to store data, and when you click "save" in many desktop apps, like the Balsamiq Wireframes program I'm using in HIC right now, what you're saving is actually just a SQLite database file with a custom file extension. It's everywhere once you know where to look. For example, functions for running SQLite code are built right into Python.
