@@ -1,57 +1,57 @@
-import sqlite3
 import requests
+from wikipedia import WikipediaPage
+import sqlite3
 
 
-db = sqlite3.connect('database.db3')
+response = requests.get("https://pageviews.wmcloud.org/topviews/yearly_datasets/en.wikipedia/2022.json")
+data = response.json()
+# print(data)
+
+cleo = WikipediaPage("Cleopatra")
+# print(cleo)
+
+db = sqlite3.connect('wikipedia.db')
 cursor = db.cursor()
 
+# cursor.execute('''
+# CREATE TABLE IF NOT EXISTS pages (
+#     title TEXT PRIMARY KEY,
+#     content TEXT,
+#     view_count INTEGER
+# )''')
+
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS "post" (
-    "subreddit" TEXT,
-    "title" TEXT,
-    "content" TEXT,
-    "permalink" TEXT,
-    "attachment" TEXT,
-    PRIMARY KEY("permalink")
-)''')
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS "comment" (
-    "id" TEXT,
-    "content" TEXT,
-    "postlink" TEXT,
-    "permalink" TEXT,
-    FOREIGN KEY("postlink") REFERENCES "post",
-    PRIMARY KEY("id")
-)''')
+CREATE VIRTUAL TABLE IF NOT EXISTS pages USING fts4 (
+    title TEXT,
+    content TEXT,
+    view_count INTEGER
+)
+''')
 
+data = data[1:5]
 
-while(True):
+for ranked_page in data:
+    article_title = ranked_page["article"]
+    view_count = ranked_page["views"]
+    page = WikipediaPage(article_title)
+    content = page.content
 
-    sub = input("Enter a subreddit name: ")
+    cursor.execute(
+        'INSERT OR IGNORE INTO pages(title, content, view_count) VALUES (?, ?, ?)',
+        (article_title, page.content, view_count)
+    )
+    print("inserted", article_title)
 
-    url = "https://www.reddit.com/r/"+sub+".json"
+db.commit()
 
-    response = requests.get(url,headers = {'User-agent':'Hacksu Scraper'})
+cleo = cursor.execute("SELECT content FROM pages WHERE title='Cleopatra'").fetchone()
+print(cleo[0][0:100])
 
-    if(not response.ok):
-        print("Got Error code: "+str(response.status_code))
-    else:
-        data = response.json().get('data')['children']
-        for x in data:
-            info = x["data"]
-            cursor.execute('''INSERT INTO post(subreddit, title, content, permalink, attachment) VALUES(?,?,?,?,?)''',
-                           (info["subreddit"],info["title"],info["selftext"],info["permalink"],info["url"]))
-            commentsReq = requests.get("https://www.reddit.com/" + info['permalink'] + ".json",headers = {'User-agent':'Hacksu Scraper'})
-            if(not commentsReq.ok):
-                print("Got Error code: "+str(commentsReq.status_code))
-            else:
-                comments = commentsReq.json()[1]['data']['children']
-                for comment in comments:
-                    if comment['kind'] != 'more':
-                        cinfo = comment['data']
-                        cursor.execute('''INSERT INTO comment(id, content, postlink, permalink) VALUES(?,?,?,?)''',(cinfo['id'], cinfo['body'], info['permalink'], cinfo['permalink']))
-                        # print(comment['data']['body'])
+cleo = cursor.execute("SELECT content FROM pages WHERE content MATCH 'Egypt'").fetchone()
+print(cleo[0][0:100])
 
+cleo = cursor.execute("SELECT content FROM pages WHERE content MATCH 'Egypt Roman Caesar'").fetchone()
+print(cleo[0][0:100])
 
-        db.commit()
-        print("Done!")
+cleo = cursor.execute("SELECT content FROM pages WHERE content MATCH '\"Queen of the Ptolemaic Kingdom \"'").fetchone()
+print(cleo[0][0:100])
