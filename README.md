@@ -179,9 +179,9 @@ CREATE VIRTUAL TABLE IF NOT EXISTS pages USING fts4 (
 )''')
 ```
 
-We are creating a virtual table, which is just something that looks like a normal SQL table but hides a more complicated data retrieval mechanism behind it. And we are using fts4, which stands for full text search 4, which is the 4th version of SQLite's full text search index mechanism. We can now use a bunch of different searches to get content from the database.
+We are creating a virtual table, which is just something that looks like a normal SQL table but hides a more complicated data retrieval mechanism behind it. And we are using fts4, which stands for full text search 4, which is the 4th version of SQLite's full text search index mechanism. There are some limitations to a virtual table; for one thing, primary key restrictions won't work, so if we run the code to insert stuff into our table over and over again, it will indeed put redundant data in the database. To get around this, we could check to see if any given article is in the table using a SELECT and then insert only if it isn't.
 
-We can search for any page that has a certain word:
+We can now use a bunch of different searches to get content from the database. We can search for any page that has a certain word using the full-text index:
 
 ```python
 cleo = cursor.execute("SELECT content FROM pages WHERE content MATCH 'Egypt'").fetchone()
